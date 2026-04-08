@@ -1,50 +1,53 @@
+apt update -y 2>/dev/null
+apt install -y curl nodejs npm 2>/dev/null
+
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+chmod +x cloudflared
 #!/bin/bash
 
-clear
+while true; do
+  clear
+  echo "=============================="
+  echo "        VPS CONTROL PANEL     "
+  echo "=============================="
+  echo "1. Show VPS Info"
+  echo "2. Start Web Server"
+  echo "3. Start Cloudflare Tunnel"
+  echo "4. Exit"
+  echo "=============================="
 
-echo "=================================="
-echo "        VPS AUTO SETUP START       "
-echo "=================================="
+  read -p "Select option: " choice
 
-sleep 1
+  case $choice in
 
-# Try update (ignore errors in limited env like IDX)
-echo "[+] Updating system..."
-apt update -y 2>/dev/null
+    1)
+      echo "CPU: 4 Cores"
+      echo "RAM: 8GB"
+      echo "Storage: 100GB"
+      read -p "Press enter to continue..."
+      ;;
 
-# Install basic tools
-echo "[+] Installing dependencies..."
-apt install -y curl wget git nodejs npm 2>/dev/null
+    2)
+      echo "Starting server..."
+      npx serve -l 3000 &
+      echo "Server running on port 3000"
+      read -p "Press enter to continue..."
+      ;;
 
-sleep 1
+    3)
+      echo "Starting Cloudflare tunnel..."
+      ./cloudflared tunnel --url http://localhost:3000
+      ;;
 
-# Show fake VPS info (like videos 😄)
-echo "----------------------------------"
-echo " VPS INFORMATION"
-echo "----------------------------------"
-echo "CPU: 4 Cores"
-echo "RAM: 8GB"
-echo "Storage: 100GB"
-echo "Location: USA"
-echo "----------------------------------"
+    4)
+      echo "Exiting..."
+      exit
+      ;;
 
-sleep 2
+    *)
+      echo "Invalid option"
+      sleep 1
+      ;;
+  esac
 
-# Start a simple web server
-echo "[+] Starting web server on port 3000..."
-npx serve -l 3000 > /dev/null 2>&1 &
-
-sleep 2
-
-# Download Cloudflare tunnel
-echo "[+] Downloading Cloudflare tunnel..."
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared > /dev/null 2>&1
-chmod +x cloudflared
-
-sleep 1
-
-# Start tunnel
-echo "[+] Creating public URL..."
-./cloudflared tunnel --url http://localhost:3000
-
-echo "[+] Setup complete!"
+done
